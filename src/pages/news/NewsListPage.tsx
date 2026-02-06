@@ -93,7 +93,7 @@ const NewsListPage: React.FC = () => {
                     </h2>
                     <div className="grid grid-cols-2 gap-6">
                         {featuredPosts.map((post) => (
-                            <Link key={post.id} to={`/news/${post.id}`} className="card" style={{ textDecoration: 'none' }}>
+                            <Link key={post.id} to={`/news/${post.id}`} className="card" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column' }}>
                                 {post.featured_image && (
                                     <div style={{ height: '200px', overflow: 'hidden' }}>
                                         <img
@@ -103,7 +103,7 @@ const NewsListPage: React.FC = () => {
                                         />
                                     </div>
                                 )}
-                                <div className="card-body">
+                                <div className="card-body flex-1 flex flex-col">
                                     <div className="flex items-center gap-2" style={{ marginBottom: 'var(--space-3)' }}>
                                         <span className="badge badge-primary">{post.category?.name}</span>
                                         {post.is_pinned && <span className="badge badge-warning">Pinned</span>}
@@ -111,35 +111,19 @@ const NewsListPage: React.FC = () => {
                                     <h3 style={{ fontSize: 'var(--font-size-xl)', marginBottom: 'var(--space-2)' }}>
                                         {post.title}
                                     </h3>
-                                    <p className="text-secondary" style={{ marginBottom: 'var(--space-4)' }}>
+                                    <p className="text-secondary mb-4 flex-1">
                                         {post.excerpt}
                                     </p>
-                                    <div className="flex items-center justify-between text-sm text-muted">
-                                        <div className="flex items-center gap-4">
-                                            <span>{formatDate(post.published_at)}</span>
-                                            <span>👁️ {post.view_count}</span>
-                                        </div>
-                                        {(user?.role === 'superuser' || (hasPermission('can_edit_news') && post.author?.id === user?.id)) && (
-                                            <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
-                                                <Link to={`/news/${post.id}/edit`} className="btn btn-secondary" style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)' }}>✏️</Link>
-                                                {(user?.role === 'superuser' || hasPermission('can_delete_news')) && (
-                                                    <button
-                                                        className="btn btn-secondary"
-                                                        style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--error)' }}
-                                                        onClick={async () => {
-                                                            if (window.confirm(`Delete "${post.title}"?`)) {
-                                                                try {
-                                                                    await newsService.deletePost(post.id);
-                                                                    setPosts((prev) => prev.filter((p) => p.id !== post.id));
-                                                                } catch (err) {
-                                                                    console.error('Failed to delete post:', err);
-                                                                }
-                                                            }
-                                                        }}
-                                                    >🗑️</button>
-                                                )}
+                                    <div className="mt-auto">
+                                        <div className="flex items-center justify-between text-sm text-muted mb-4">
+                                            <div className="flex items-center gap-4">
+                                                <span>{formatDate(post.published_at)}</span>
+                                                <span>👁️ {post.view_count}</span>
                                             </div>
-                                        )}
+                                        </div>
+                                        <div className="btn btn-primary w-full text-center">
+                                            Read More
+                                        </div>
                                     </div>
                                 </div>
                             </Link>
@@ -166,7 +150,7 @@ const NewsListPage: React.FC = () => {
                                         />
                                     </div>
                                 )}
-                                <div style={{ flex: 1 }}>
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                                     <div className="flex items-center gap-2" style={{ marginBottom: 'var(--space-2)' }}>
                                         <span className="badge badge-secondary">{post.category?.name}</span>
                                         <span className="text-sm text-muted">{formatDate(post.published_at)}</span>
@@ -174,33 +158,37 @@ const NewsListPage: React.FC = () => {
                                     <h3 style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-2)' }}>
                                         {post.title}
                                     </h3>
-                                    <p className="text-secondary text-sm">{post.excerpt}</p>
-                                    <div className="flex items-center justify-between text-sm text-muted" style={{ marginTop: 'var(--space-3)' }}>
-                                        <div className="flex items-center gap-4">
-                                            <span>By {post.author?.full_name || post.author?.username}</span>
-                                            <span>👁️ {post.view_count}</span>
-                                        </div>
-                                        {(user?.role === 'superuser' || (hasPermission('can_edit_news') && post.author?.id === user?.id)) && (
-                                            <div className="flex gap-2" onClick={(e) => e.preventDefault()}>
-                                                <Link to={`/news/${post.id}/edit`} className="btn btn-secondary" style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)' }}>✏️</Link>
-                                                {(user?.role === 'superuser' || hasPermission('can_delete_news')) && (
-                                                    <button
-                                                        className="btn btn-secondary"
-                                                        style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--error)' }}
-                                                        onClick={async () => {
-                                                            if (window.confirm(`Delete "${post.title}"?`)) {
-                                                                try {
-                                                                    await newsService.deletePost(post.id);
-                                                                    setPosts((prev) => prev.filter((p) => p.id !== post.id));
-                                                                } catch (err) {
-                                                                    console.error('Failed to delete post:', err);
-                                                                }
-                                                            }
-                                                        }}
-                                                    >🗑️</button>
-                                                )}
+                                    <p className="text-secondary text-sm mb-4">{post.excerpt}</p>
+
+                                    <div className="mt-auto flex justify-between items-center">
+                                        <div className="btn btn-primary btn-sm">Read More</div>
+                                        <div className="flex items-center justify-between text-sm text-muted">
+                                            <div className="flex items-center gap-4">
+                                                <span>By {post.author?.full_name || post.author?.username}</span>
+                                                <span>👁️ {post.view_count}</span>
                                             </div>
-                                        )}
+                                            {(user?.role === 'superuser' || (hasPermission('can_edit_news') && post.author?.id === user?.id)) && (
+                                                <div className="flex gap-2 ml-4" onClick={(e) => e.preventDefault()}>
+                                                    <Link to={`/news/${post.id}/edit`} className="btn btn-secondary" style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)' }}>✏️</Link>
+                                                    {(user?.role === 'superuser' || hasPermission('can_delete_news')) && (
+                                                        <button
+                                                            className="btn btn-secondary"
+                                                            style={{ padding: 'var(--space-1) var(--space-2)', fontSize: 'var(--font-size-sm)', color: 'var(--error)' }}
+                                                            onClick={async () => {
+                                                                if (window.confirm(`Delete "${post.title}"?`)) {
+                                                                    try {
+                                                                        await newsService.deletePost(post.id);
+                                                                        setPosts((prev) => prev.filter((p) => p.id !== post.id));
+                                                                    } catch (err) {
+                                                                        console.error('Failed to delete post:', err);
+                                                                    }
+                                                                }
+                                                            }}
+                                                        >🗑️</button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

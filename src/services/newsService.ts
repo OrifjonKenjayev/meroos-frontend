@@ -47,12 +47,22 @@ export const newsService = {
 
     // Comments
     getComments: async (postId: number): Promise<NewsComment[]> => {
-        const response = await api.get<NewsComment[]>(`/news/posts/${postId}/comments/`);
-        return response.data;
+        const response = await api.get<NewsComment[] | PaginatedResponse<NewsComment>>('/news/comments/', {
+            params: { post: postId }
+        });
+
+        // Handle paginated response
+        if (response.data && 'results' in response.data) {
+            return (response.data as PaginatedResponse<NewsComment>).results;
+        }
+
+        // Handle flat array response
+        return Array.isArray(response.data) ? response.data : [];
     },
 
     addComment: async (postId: number, content: string, parentId?: number): Promise<NewsComment> => {
-        const response = await api.post<NewsComment>(`/news/posts/${postId}/comments/`, {
+        const response = await api.post<NewsComment>('/news/comments/', {
+            post: postId,
             content,
             parent: parentId || null,
         });

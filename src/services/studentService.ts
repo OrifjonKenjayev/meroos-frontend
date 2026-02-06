@@ -1,7 +1,21 @@
 import api from './api';
 import type { StudentProfile } from '../types';
 
+export interface Teacher {
+    id: number;
+    name: string;
+    subject: string;
+    initials: string;
+    avatar: string | null;
+}
+
 export const studentService = {
+    // Get all active teachers
+    getTeachers: async (): Promise<Teacher[]> => {
+        const response = await api.get<Teacher[]>('/auth/students/teachers/');
+        return response.data;
+    },
+
     // Get all students (filtered by teacher's classes in backend)
     getStudents: async (): Promise<StudentProfile[]> => {
         const response = await api.get<any>('/auth/students/');

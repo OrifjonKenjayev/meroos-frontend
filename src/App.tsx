@@ -16,8 +16,8 @@ import KahootHostLobbyPage from './pages/teacher/KahootHostLobbyPage';
 import KahootHostGamePage from './pages/teacher/KahootHostGamePage';
 import TeacherClassesPage from './pages/teacher/TeacherClassesPage';
 import TeacherStudentsPage from './pages/teacher/TeacherStudentsPage';
-import { ResourceListPage, ResourceFormPage } from './pages/resources';
-import { NewsListPage, NewsFormPage } from './pages/news';
+import { ResourceListPage, ResourceFormPage, ResourceDetailPage } from './pages/resources';
+import { NewsListPage, NewsFormPage, NewsDetailPage } from './pages/news';
 import { ProfilePage } from './pages/profile';
 import { LeaderboardPage } from './pages/leaderboard';
 import AboutPage from './pages/AboutPage';
@@ -179,6 +179,14 @@ function App() {
                 }
               />
               <Route
+                path="/resources/:id"
+                element={
+                  <ProtectedRoute requireAuth={false}>
+                    <ResourceDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/resources/upload"
                 element={
                   <ProtectedRoute roles={['superuser', 'teacher']} permission="can_upload_resources">
@@ -201,6 +209,14 @@ function App() {
                 element={
                   <ProtectedRoute requireAuth={false}>
                     <NewsListPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/news/:id"
+                element={
+                  <ProtectedRoute requireAuth={false}>
+                    <NewsDetailPage />
                   </ProtectedRoute>
                 }
               />

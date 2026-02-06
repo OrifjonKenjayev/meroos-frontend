@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts';
-import { analyticsService, quizService, newsService, resourceService } from '../../services';
+import { analyticsService, quizService, newsService, resourceService, studentService } from '../../services';
 import type { UserStatistics, Quiz, NewsPost } from '../../types';
 
-// Mock teachers data (API not available to students)
-const mockTeachers = [
-    { id: 1, name: 'Dr. Sarah Chen', subject: 'Mathematics', initials: 'SC', color: '#6366f1' },
-    { id: 2, name: 'Prof. James Wilson', subject: 'Physics', initials: 'JW', color: '#14b8a6' },
-    { id: 3, name: 'Ms. Emily Davis', subject: 'Literature', initials: 'ED', color: '#f43f5e' },
-    { id: 4, name: 'Mr. David Kim', subject: 'Chemistry', initials: 'DK', color: '#f59e0b' },
-    { id: 5, name: 'Dr. Lisa Patel', subject: 'Biology', initials: 'LP', color: '#8b5cf6' },
-];
+// Mock teachers data removed
 
 const StudentDashboard: React.FC = () => {
     const { user } = useAuth();
@@ -19,6 +12,7 @@ const StudentDashboard: React.FC = () => {
     const [stats, setStats] = useState<UserStatistics | null>(null);
     const [recentQuizzes, setRecentQuizzes] = useState<Quiz[]>([]);
     const [latestNews, setLatestNews] = useState<NewsPost[]>([]);
+    const [teachers, setTeachers] = useState<any[]>([]);
     const [resourceCount, setResourceCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -26,16 +20,18 @@ const StudentDashboard: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [statsData, quizzesData, newsData, resourcesData] = await Promise.all([
+                const [statsData, quizzesData, newsData, resourcesData, teachersData] = await Promise.all([
                     analyticsService.getMyStats(),
                     quizService.getQuizzes({ page: 1 }),
                     newsService.getPosts({ page: 1 }).catch(() => ({ results: [] })),
                     resourceService.getResources({ page: 1 }).catch(() => ({ results: [], count: 0 })),
+                    studentService.getTeachers().catch(() => []),
                 ]);
                 setStats(statsData);
                 setRecentQuizzes(quizzesData.results.slice(0, 4));
                 setLatestNews(newsData.results?.slice(0, 3) || []);
                 setResourceCount(resourcesData.count || resourcesData.results?.length || 0);
+                setTeachers(teachersData);
             } catch (error) {
                 console.error('Failed to fetch dashboard data:', error);
             } finally {
@@ -59,6 +55,16 @@ const StudentDashboard: React.FC = () => {
             </div>
         );
     }
+
+    // Helper to generate consistent color from string
+    const stringToColor = (str: string) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+        return '#' + '00000'.substring(0, 6 - c.length) + c;
+    };
 
     return (
         <div>
@@ -129,23 +135,40 @@ const StudentDashboard: React.FC = () => {
                         <p className="section-subtitle">Learn from the best educators in their fields</p>
                     </div>
                 </div>
-                <div className="teachers-grid">
-                    {mockTeachers.map((teacher) => (
-                        <div key={teacher.id} className="teacher-card">
-                            <div className="teacher-avatar-wrapper">
-                                <div
-                                    className="teacher-avatar"
-                                    style={{ background: `linear-gradient(135deg, ${teacher.color}, ${teacher.color}dd)` }}
-                                >
-                                    {teacher.initials}
+                {teachers.length > 0 ? (
+                    <div className="teachers-grid">
+                        {teachers.map((teacher) => (
+                            <div key={teacher.id} className="teacher-card">
+                                <div className="teacher-avatar-wrapper">
+                                    {teacher.avatar ? (
+                                        <img
+                                            src={teacher.avatar}
+                                            alt={teacher.name}
+                                            className="teacher-avatar"
+                                            style={{ objectFit: 'cover' }}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="teacher-avatar"
+                                            style={{ background: `linear-gradient(135deg, ${stringToColor(teacher.name)}, ${stringToColor(teacher.name)}dd)` }}
+                                        >
+                                            {teacher.initials}
+                                        </div>
+                                    )}
+                                    <div className="teacher-status"></div>
                                 </div>
-                                <div className="teacher-status"></div>
+                                <div className="teacher-name">{teacher.name}</div>
+                                <div className="teacher-subject">{teacher.subject}</div>
                             </div>
-                            <div className="teacher-name">{teacher.name}</div>
-                            <div className="teacher-subject">{teacher.subject}</div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="empty-state" style={{ padding: '2rem', textAlign: 'center', background: 'var(--card-bg)', borderRadius: 'var(--radius-lg)' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>👨‍🏫</div>
+                        <h3>No mentors available</h3>
+                        <p className="text-secondary">Our expert mentors will be joining soon.</p>
+                    </div>
+                )}
             </section>
 
             {/* Bento Grid - Learning Hub */}
