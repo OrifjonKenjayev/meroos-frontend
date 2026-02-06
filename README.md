@@ -88,7 +88,7 @@ meroos-frontend/
 ### Prerequisites
 - **Node.js** 18.0 or higher
 - **npm** or **yarn**
-- Backend server running (see [meroos-backend](../meroos-backend/README.md))
+- Backend server running (see [meroos-backend](https://github.com/OrifjonKenjayev/meroos-backend))
 
 ### Installation
 
@@ -221,8 +221,10 @@ The build output will be in the `dist/` directory, ready for deployment.
 
 ## 🔗 Related
 
-- [Backend Repository](../meroos-backend/README.md) - Django REST API
-- [API Documentation](../meroos-backend/API_DOCUMENTATION.md) - Complete API reference
+- [Backend Repository](https://github.com/OrifjonKenjayev/meroos-backend/blob/main/README.md) - Django REST API 
+https://github.com/OrifjonKenjayev/meroos-backend
+- [API Documentation](https://github.com/OrifjonKenjayev/meroos-backend/blob/main/API_DOCUMENTATION.md) - Complete API reference
+
 
 ---
 
