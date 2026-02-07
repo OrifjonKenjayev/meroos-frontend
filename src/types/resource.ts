@@ -18,6 +18,7 @@ export interface Resource {
     category: ResourceCategory;
     file?: string | null;
     video_url?: string | null;
+    external_url?: string | null;
     video_duration?: number;
     thumbnail?: string | null;
     uploaded_by: {

@@ -55,6 +55,24 @@ const ResourceDetailPage: React.FC = () => {
         });
     };
 
+    const getEmbedUrl = (url: string | null | undefined) => {
+        if (!url) return '';
+
+        // Handle standard watch URL: youtube.com/watch?v=ID
+        const watchMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (watchMatch && watchMatch[1]) {
+            return `https://www.youtube.com/embed/${watchMatch[1]}`;
+        }
+
+        // Handle embed URL: youtube.com/embed/ID
+        const embedMatch = url.match(/youtube\.com\/embed\/([\w-]{11})/);
+        if (embedMatch && embedMatch[1]) {
+            return url;
+        }
+
+        return url;
+    };
+
     if (loading) {
         return (
             <div className="loading-overlay">
@@ -99,24 +117,28 @@ const ResourceDetailPage: React.FC = () => {
                     </div>
 
                     {/* Preview Section - Simplified logic based on type */}
-                    {resource.resource_type === 'video' && resource.video_url && (
-                        <div className="mb-8" style={{ marginBottom: 'var(--space-8)' }}>
-                            <div className="aspect-w-16 aspect-h-9" style={{ position: 'relative', paddingTop: '56.25%', background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-                                {/* Basic YouTube embed support or direct video */}
-                                {resource.video_url.includes('youtube.com') || resource.video_url.includes('youtu.be') ? (
-                                    <iframe
-                                        src={resource.video_url.replace('watch?v=', 'embed/').split('&')[0]}
-                                        style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowFullScreen
-                                        title={resource.title}
-                                    />
-                                ) : (
-                                    <video controls src={resource.video_url} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
-                                )}
+                    {((resource.resource_type === 'video' && resource.video_url) ||
+                        (resource.resource_type === 'link' && resource.external_url && (resource.external_url.includes('youtube.com') || resource.external_url.includes('youtu.be')))) && (
+                            <div className="mb-8" style={{ marginBottom: 'var(--space-8)' }}>
+                                <div className="aspect-w-16 aspect-h-9" style={{ position: 'relative', paddingTop: '56.25%', background: '#000', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                                    {/* Basic YouTube embed support or direct video */}
+                                    {((resource.video_url && (resource.video_url.includes('youtube.com') || resource.video_url.includes('youtu.be'))) ||
+                                        (resource.external_url && (resource.external_url.includes('youtube.com') || resource.external_url.includes('youtu.be')))) ? (
+                                        <iframe
+                                            src={getEmbedUrl(resource.video_url || resource.external_url)}
+                                            style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 0 }}
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            title={resource.title}
+                                        />
+                                    ) : (
+                                        resource.video_url ? (
+                                            <video controls src={resource.video_url} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
+                                        ) : null
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
                     {resource.resource_type === 'image' && resource.file && (
                         <div className="mb-8" style={{ marginBottom: 'var(--space-8)' }}>
